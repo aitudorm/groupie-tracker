@@ -3,6 +3,7 @@ package server
 import (
 	"html/template"
 	"log"
+	"main/api"
 	"net/http"
 	"strconv"
 )
@@ -17,13 +18,16 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	artists := grabjson.GetJsonData()
+	artists := api.GetArtistData()
 	files := []string{"ui/templates/index.html"}
 	tmpl, err := template.ParseFiles(files...)
 	if err != nil {
 		Errors(w, r, http.StatusInternalServerError)
 		return
 	}
+
+	err = tmpl.ExecuteTemplate(w, "index.html", artists)
+
 	if err != nil {
 		Errors(w, r, http.StatusInternalServerError)
 		return
@@ -69,8 +73,8 @@ func details(w http.ResponseWriter, r *http.Request) {
 		Errors(w, r, http.StatusBadRequest)
 		return
 	}
-	artist := grabjson.GetJsonData()
-	detailArtist := grabjson.GetMapData(id, &artist[id-1])
+	artists := api.GetArtistData()
+	detailArtist := api.GetDetailedData(id, &artists[id-1])
 	files := []string{"ui/templates/detail.html"}
 	tmpl, err := template.ParseFiles(files...)
 	if err != nil {
